@@ -1,10 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace ElectricPie.AStar
 {
     public class AStarGrid : MonoBehaviour
     {
+        public List<AStarNode> Path = null;
+        
         [SerializeField] private LayerMask m_unwalkableMask = new LayerMask();
         [SerializeField] private Vector2 m_worldSize = new Vector2(10, 10);
         [SerializeField] private float m_nodeRadius = 0.5f;
@@ -25,6 +28,30 @@ namespace ElectricPie.AStar
             int y = Mathf.RoundToInt((m_gridSize.y - 1) * percentY);
 
             return m_grid[x, y];
+        }
+
+        public List<AStarNode> GetNeighbours(AStarNode node)
+        {
+            List<AStarNode> neighbours = new List<AStarNode>();
+
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0)
+                        continue;
+
+                    int checkX = node.GridPosition.x + x;
+                    int checkY = node.GridPosition.y + y;
+
+                    if (checkX >= 0 && checkX < m_gridSize.x && checkY >= 0 && checkY < m_gridSize.y)
+                    {
+                        neighbours.Add(m_grid[checkX, checkY]);
+                    }
+                }
+            }
+            
+            return neighbours;
         }
         
         private void Start()
@@ -47,7 +74,7 @@ namespace ElectricPie.AStar
                 {
                     Vector3 worldPosition = worldBottomLeft + Vector3.right * (x * m_nodeDiameter + m_nodeRadius) + Vector3.forward * (y * m_nodeDiameter + m_nodeRadius);
                     bool isWalkable = !Physics.CheckSphere(worldPosition, m_nodeRadius, m_unwalkableMask);
-                    m_grid[x, y] = new AStarNode(worldPosition, isWalkable);
+                    m_grid[x, y] = new AStarNode(worldPosition, isWalkable, new Vector2Int(x, y));
                 }
             }
         }
@@ -70,6 +97,13 @@ namespace ElectricPie.AStar
                         Gizmos.color = Color.cyan;
                     }
 
+                    if (Path is not null)
+                    {
+                        if (Path.Contains(node))
+                        {
+                            Gizmos.color = Color.black;
+                        }
+                    }
                     
                     Gizmos.DrawCube(node.WorldPosition, Vector3.one * m_nodeDiameter * 0.9f);
                 }
