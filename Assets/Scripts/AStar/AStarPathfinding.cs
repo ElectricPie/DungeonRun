@@ -1,34 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 using ElectricPie.Collections;
+using Vector2 = UnityEngine.Vector2;
+using Vector3 = UnityEngine.Vector3;
 
 namespace ElectricPie.AStar
 {
+    [RequireComponent(typeof(AStarGrid), typeof(PathRequestManager))]
     public class AStarPathfinding : MonoBehaviour
     {
-        [SerializeField] private AStarGrid m_grid = null;
+        private PathRequestManager m_requestManager;
+        
+        private AStarGrid m_grid = null;
 
-        [SerializeField] private Transform m_debugSeeker = null;
-        [SerializeField] private Transform m_debugTarget;
-
+        public void StartFindPath(Vector3 startPos, Vector3 endPos)
+        {
+            StartCoroutine(FindPath(startPos, endPos));
+        }
+        
         private void Awake()
         {
-            m_grid ??= GetComponent<AStarGrid>();
+            m_grid = GetComponent<AStarGrid>();
+            m_requestManager = GetComponent<PathRequestManager>();
         }
 
-        private void Update()
+        private IEnumerator FindPath(Vector3 startPos, Vector3 targetPos)
         {
-            if (Input.GetButtonDown("Jump"))
-            {
-                FindPath(m_debugSeeker.position, m_debugTarget.position);
-            }
-        }
-
-        private void FindPath(Vector3 startPos, Vector3 targetPos)
-        {
+            Vector3[] waypoints = Array.Empty<Vector3>();
+            bool foundPath = false;
+            
             AStarNode startNode = m_grid.NodeFromWorldPosition(startPos);
             AStarNode targetNode = m_grid.NodeFromWorldPosition(targetPos);
+
+            // Exit early if path is not possible
+            if (!startNode.IsWalkable || !targetNode.IsWalkable)
+            {
+                m_requestManager.FinishedProcessingPath(waypoints, false);
+                yield break;
+            }
 
             Heap<AStarNode> openSet = new Heap<AStarNode>(m_grid.MaxSize);
             openSet.Add(startNode);
@@ -42,8 +54,8 @@ namespace ElectricPie.AStar
 
                 if (currentNode == targetNode)
                 {
-                    RetracePath(startNode, targetNode);
-                    return;
+                    foundPath = true;
+                    break;
                 }
 
                 foreach (AStarNode neighbour in m_grid.GetNeighbours(currentNode))
@@ -65,6 +77,14 @@ namespace ElectricPie.AStar
                     }
                 }
             }
+
+            yield return null;
+            if (foundPath)
+            {
+                waypoints = RetracePath(startNode, targetNode);
+            }
+
+            m_requestManager.FinishedProcessingPath(waypoints, foundPath);
         }
 
         private static int GetDistance(AStarNode a, AStarNode b)
@@ -80,7 +100,26 @@ namespace ElectricPie.AStar
             return 14 * distX + 10 * (distY - distX);
         }
 
-        private void RetracePath(AStarNode startNode, AStarNode endNode)
+        private static Vector3[] SimplifyPath(List<AStarNode> path)
+        {
+            List<Vector3> waypoints = new List<Vector3>();
+            Vector2 directionOld = Vector2.zero;
+
+            for (int i = 1; i < path.Count; i++)
+            {
+                Vector2 directionNew = path[i - 1].GridPosition - path[i].GridPosition;
+                if (directionNew != directionOld)
+                {
+                    waypoints.Add(path[i].WorldPosition);
+                }
+
+                directionOld = directionNew;
+            }
+
+            return waypoints.ToArray();
+        }
+        
+        private static Vector3[] RetracePath(AStarNode startNode, AStarNode endNode)
         {
             List<AStarNode> path = new List<AStarNode>();
             AStarNode currentNode = endNode;
@@ -92,7 +131,7 @@ namespace ElectricPie.AStar
             }
             path.Reverse();
             
-            m_grid.Path = path;
+            return SimplifyPath(path);
         }
     }
 }

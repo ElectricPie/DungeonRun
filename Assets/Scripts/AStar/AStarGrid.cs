@@ -5,8 +5,6 @@ namespace ElectricPie.AStar
 {
     public class AStarGrid : MonoBehaviour
     {
-        public List<AStarNode> Path = null;
-        
         [SerializeField] private LayerMask m_unwalkableMask = new LayerMask();
         [SerializeField] private Vector2 m_worldSize = new Vector2(10, 10);
         [SerializeField] private float m_nodeRadius = 0.5f;
@@ -53,7 +51,7 @@ namespace ElectricPie.AStar
             return neighbours;
         }
         
-        private void Start()
+        private void Awake()
         {
             m_nodeDiameter = m_nodeRadius * 2.0f;
             m_gridSize.x = Mathf.RoundToInt(m_worldSize.x / m_nodeDiameter);
@@ -82,16 +80,6 @@ namespace ElectricPie.AStar
         {
             // Draw the grid bounds
             Gizmos.DrawWireCube(transform.position, new Vector3(m_worldSize.x, 1.0f, m_worldSize.y));
-            
-            // Draw only path nodes
-            Gizmos.color = Color.black;
-            if (Path is not null)
-            {
-                foreach (AStarNode node in Path)
-                {
-                    Gizmos.DrawCube(node.WorldPosition, Vector3.one * m_nodeDiameter * 0.9f);
-                }
-            }
         }
     }
 }
