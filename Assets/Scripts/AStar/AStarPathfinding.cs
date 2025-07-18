@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+
+using ElectricPie.Collections;
 
 namespace ElectricPie.AStar
 {
@@ -8,8 +9,8 @@ namespace ElectricPie.AStar
     {
         [SerializeField] private AStarGrid m_grid = null;
 
-        [SerializeField] private Transform DebugSeeker = null;
-        [SerializeField] private Transform DebugTarget;
+        [SerializeField] private Transform m_debugSeeker = null;
+        [SerializeField] private Transform m_debugTarget;
 
         private void Awake()
         {
@@ -18,7 +19,10 @@ namespace ElectricPie.AStar
 
         private void Update()
         {
-            FindPath(DebugSeeker.position, DebugTarget.position);
+            if (Input.GetButtonDown("Jump"))
+            {
+                FindPath(m_debugSeeker.position, m_debugTarget.position);
+            }
         }
 
         private void FindPath(Vector3 startPos, Vector3 targetPos)
@@ -26,21 +30,14 @@ namespace ElectricPie.AStar
             AStarNode startNode = m_grid.NodeFromWorldPosition(startPos);
             AStarNode targetNode = m_grid.NodeFromWorldPosition(targetPos);
 
-            List<AStarNode> openSet = new List<AStarNode> { startNode };
+            Heap<AStarNode> openSet = new Heap<AStarNode>(m_grid.MaxSize);
+            openSet.Add(startNode);
             HashSet<AStarNode> closedSet = new HashSet<AStarNode>();
 
             while (openSet.Count > 0)
             {
-                AStarNode currentNode = openSet[0];
-                for (int i = 0; i < openSet.Count; i++)
-                {
-                    if (openSet[i].FCost < currentNode.FCost || openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost)
-                    {
-                        currentNode = openSet[i];
-                    }
-                }
+                AStarNode currentNode = openSet.RemoveFirst();
 
-                openSet.Remove(currentNode);
                 closedSet.Add(currentNode);
 
                 if (currentNode == targetNode)
@@ -70,7 +67,7 @@ namespace ElectricPie.AStar
             }
         }
 
-        private int GetDistance(AStarNode a, AStarNode b)
+        private static int GetDistance(AStarNode a, AStarNode b)
         {
             int distX = Mathf.Abs(a.GridPosition.x - b.GridPosition.x);
             int distY = Mathf.Abs(a.GridPosition.y - b.GridPosition.y);
@@ -93,8 +90,8 @@ namespace ElectricPie.AStar
                 path.Add(currentNode);
                 currentNode = currentNode.Parent;
             }
-            
             path.Reverse();
+            
             m_grid.Path = path;
         }
     }

@@ -329,7 +329,7 @@ Transform:
   m_GameObject: {fileID: 179006568}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.86, y: 0, z: 4.18}
+  m_LocalPosition: {x: -10, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -635,7 +635,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   m_worldSize: {x: 30, y: 30}
-  m_nodeRadius: 0.5
+  m_nodeRadius: 0.1
   m_debugCharacter: {fileID: 1674426728}
 --- !u!4 &778746369
 Transform:
@@ -665,8 +665,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_grid: {fileID: 0}
-  DebugSeeker: {fileID: 1674426728}
-  DebugTarget: {fileID: 179006572}
+  m_debugSeeker: {fileID: 1674426728}
+  m_debugTarget: {fileID: 179006572}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,7 +928,7 @@ Transform:
   m_GameObject: {fileID: 1674426724}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 10, y: 1, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

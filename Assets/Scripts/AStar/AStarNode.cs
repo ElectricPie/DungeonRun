@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using ElectricPie.Collections;
+using UnityEngine;
 
 namespace ElectricPie.AStar
 {
-    public class AStarNode
+    public class AStarNode : IHeapItem<AStarNode>
     {
         public bool IsWalkable { get; private set; } = false;
         public Vector3 WorldPosition { get; private set; }
@@ -24,5 +25,22 @@ namespace ElectricPie.AStar
             IsWalkable = isWalkable;
             GridPosition = gridPosition;
         }
+
+        /* IHeapItem Interface */
+        public int HeapIndex { get; set; }
+        
+        public int CompareTo(AStarNode otherNode)
+        {
+            int compare = FCost.CompareTo(otherNode.FCost);
+            
+            // Use h cost for tiebreakers
+            if (compare == 0)
+            {
+                compare = HCost.CompareTo(otherNode.HCost);
+            }
+
+            return -compare;
+        }
+        /* IHeapItem Interface end */
     }
 }

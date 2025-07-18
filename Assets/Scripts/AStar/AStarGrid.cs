@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace ElectricPie.AStar
 {
@@ -11,13 +10,13 @@ namespace ElectricPie.AStar
         [SerializeField] private LayerMask m_unwalkableMask = new LayerMask();
         [SerializeField] private Vector2 m_worldSize = new Vector2(10, 10);
         [SerializeField] private float m_nodeRadius = 0.5f;
-
-        [SerializeField] private Transform m_debugCharacter = null;
         
         private AStarNode[,] m_grid = null;
 
         private float m_nodeDiameter = 0.0f;
         private Vector2Int m_gridSize = Vector2Int.zero;
+
+        public int MaxSize => m_gridSize.x * m_gridSize.y;
 
         public AStarNode NodeFromWorldPosition(Vector3 worldPosition)
         {
@@ -84,27 +83,12 @@ namespace ElectricPie.AStar
             // Draw the grid bounds
             Gizmos.DrawWireCube(transform.position, new Vector3(m_worldSize.x, 1.0f, m_worldSize.y));
             
-            // Draw the grid nodes
-            if (m_grid is not null)
+            // Draw only path nodes
+            Gizmos.color = Color.black;
+            if (Path is not null)
             {
-                AStarNode playerNode = NodeFromWorldPosition(m_debugCharacter.position);
-                
-                foreach (AStarNode node in m_grid)
+                foreach (AStarNode node in Path)
                 {
-                    Gizmos.color = node.IsWalkable ? Color.green : Color.red;
-                    if (node == playerNode)
-                    {
-                        Gizmos.color = Color.cyan;
-                    }
-
-                    if (Path is not null)
-                    {
-                        if (Path.Contains(node))
-                        {
-                            Gizmos.color = Color.black;
-                        }
-                    }
-                    
                     Gizmos.DrawCube(node.WorldPosition, Vector3.one * m_nodeDiameter * 0.9f);
                 }
             }
