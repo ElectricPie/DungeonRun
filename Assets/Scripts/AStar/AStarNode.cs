@@ -8,22 +8,21 @@ namespace ElectricPie.AStar
         public bool IsWalkable { get; private set; } = false;
         public Vector3 WorldPosition { get; private set; }
         public Vector2Int GridPosition { get; private set; }
+        public int MovementPenalty { get ; private set; } = 0;
 
         public AStarNode Parent = null;
 
         public int GCost = 0;
         public int HCost = 0;
 
-        public int FCost
-        {
-            get { return GCost + HCost; }
-        }
+        public int FCost => GCost + HCost;
 
-        public AStarNode(Vector3 worldPosition, bool isWalkable, Vector2Int gridPosition)
+        public AStarNode(Vector3 worldPosition, bool isWalkable, Vector2Int gridPosition, int movementPenalty)
         {
             WorldPosition = worldPosition;
             IsWalkable = isWalkable;
             GridPosition = gridPosition;
+            MovementPenalty = movementPenalty;
         }
 
         /* IHeapItem Interface */

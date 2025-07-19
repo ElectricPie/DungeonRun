@@ -63,14 +63,18 @@ namespace ElectricPie.AStar
                     if (neighbour.IsWalkable == false || closedSet.Contains(neighbour))
                         continue;
 
-                    int newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour);
+                    int newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour) + neighbour.MovementPenalty;
                     if (newMovementCostToNeighbour < neighbour.GCost || openSet.Contains(neighbour) == false)
                     {
                         neighbour.GCost = newMovementCostToNeighbour;
                         neighbour.HCost = GetDistance(neighbour, targetNode);
                         neighbour.Parent = currentNode;
 
-                        if (openSet.Contains(neighbour) == false)
+                        if (openSet.Contains(neighbour))
+                        {
+                            openSet.UpdateItem(neighbour);
+                        }
+                        else
                         {
                             openSet.Add(neighbour);
                         }
@@ -115,7 +119,7 @@ namespace ElectricPie.AStar
 
                 directionOld = directionNew;
             }
-
+            
             return waypoints.ToArray();
         }
         
@@ -129,9 +133,10 @@ namespace ElectricPie.AStar
                 path.Add(currentNode);
                 currentNode = currentNode.Parent;
             }
-            path.Reverse();
             
-            return SimplifyPath(path);
+            Vector3[] waypoints = SimplifyPath(path);
+            Array.Reverse(waypoints);
+            return waypoints;
         }
     }
 }

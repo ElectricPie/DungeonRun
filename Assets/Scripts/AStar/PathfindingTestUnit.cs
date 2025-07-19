@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace ElectricPie.AStar
@@ -50,6 +51,21 @@ namespace ElectricPie.AStar
             }
 
             transform.position = Vector3.MoveTowards(transform.position, m_currentWaypoint, m_speed);
+        }
+        
+        private void OnDrawGizmos()
+        {
+            if (m_path.Length <= 0)
+                return;
+
+            Gizmos.color = Color.black;
+            foreach (Vector3 waypoint in m_path)
+            {
+                Gizmos.DrawCube(waypoint, Vector3.one * 0.9f);
+            }
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, m_currentWaypoint);
         }
     }
 }
