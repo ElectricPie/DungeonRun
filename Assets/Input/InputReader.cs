@@ -12,6 +12,7 @@ namespace DungeonRun.Input
         
         // Events
         public event UnityAction<Vector2> MoveAction = delegate { };
+        public event UnityAction SelectAction = delegate { };
         
         // Polls
         public Vector2 Direction => InputActions.Player.Move.ReadValue<Vector2>();
@@ -30,6 +31,14 @@ namespace DungeonRun.Input
         public void OnMove(InputAction.CallbackContext context)
         {
             MoveAction.Invoke(context.ReadValue<Vector2>());
+        }
+
+        public void OnSelect(InputAction.CallbackContext context)
+        {
+            if (context.started)
+            {
+                SelectAction.Invoke();
+            }
         }
     }
 }
