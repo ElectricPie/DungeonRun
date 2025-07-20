@@ -15,7 +15,6 @@ namespace ElectricPie.AStar
         [SerializeField] private bool m_showGridGizmos = false;
         
         private AStarNode[,] m_grid = null;
-        
 
         private float m_nodeDiameter = 0.0f;
         private Vector2Int m_gridSize = Vector2Int.zero;
@@ -62,10 +61,16 @@ namespace ElectricPie.AStar
         
         private void Awake()
         {
+            InitializeGrid();
+        }
+
+        private void InitializeGrid()
+        {
             m_nodeDiameter = m_nodeRadius * 2.0f;
             m_gridSize.x = Mathf.RoundToInt(m_worldSize.x / m_nodeDiameter);
             m_gridSize.y = Mathf.RoundToInt(m_worldSize.y / m_nodeDiameter);
             
+            m_walkableRegionDictionary.Clear();
             foreach (AStarTerrainType region in m_walkableRegions)
             {
                 m_walkableMask |= region.TerrainMask;
@@ -74,6 +79,7 @@ namespace ElectricPie.AStar
             
             CreateGrid();
         }
+        
 
         private void CreateGrid()
         {
@@ -107,23 +113,26 @@ namespace ElectricPie.AStar
         {
             // Draw the grid bounds
             Gizmos.DrawWireCube(transform.position, new Vector3(m_worldSize.x, 1.0f, m_worldSize.y));
-
+            
             if (m_showGridGizmos is false)
                 return;
             
+            Vector3 cubeSize = Vector3.one * m_nodeDiameter * 0.9f;
+            cubeSize.y = 0.1f; // Make the cubes flat
             for (int x = 0; x < m_gridSize.x; x++)
             {
                 for (int y = 0; y < m_gridSize.y; y++)
                 {
                     AStarNode node = m_grid[x, y];
                     Gizmos.color = node.IsWalkable ? Color.green : Color.red;
-                    if (node.MovementPenalty > 3)
-                    {
-                        Gizmos.color = Color.yellow;
-                    }
-                    Gizmos.DrawCube(node.WorldPosition, Vector3.one * m_nodeDiameter * 0.9f);
+                    Gizmos.DrawCube(node.WorldPosition, cubeSize);
                 }
             }
+        }
+        
+        private void OnValidate()
+        {
+            InitializeGrid();
         }
     }
 
