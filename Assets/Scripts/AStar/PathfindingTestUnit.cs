@@ -23,13 +23,20 @@ namespace ElectricPie.AStar
                 
                 m_path = newPath;
                 m_targetIndex = 0;
-                m_currentWaypoint = m_path[0];
+                GetNextWaypoint();
             });
         }
 
         private void Update()
         {
             MoveToWaypoint();
+        }
+
+        private void GetNextWaypoint()
+        {
+            m_currentWaypoint = m_path[m_targetIndex];
+            // Keep the y waypoint at the same height as the unit
+            m_currentWaypoint.y = transform.position.y;
         }
 
         private void MoveToWaypoint()
@@ -47,10 +54,19 @@ namespace ElectricPie.AStar
                     m_path = Array.Empty<Vector3>();
                     return;
                 }
-                m_currentWaypoint = m_path[m_targetIndex];
+                GetNextWaypoint();
             }
 
-            transform.position = Vector3.MoveTowards(transform.position, m_currentWaypoint, m_speed);
+            Vector3 newPosition = Vector3.MoveTowards(transform.position, m_currentWaypoint, m_speed);
+
+            // Keep the unit above the ground
+            Ray ray = new Ray(transform.position, transform.position + (Vector3.down * 50.0f));
+            if (Physics.Raycast(ray, out RaycastHit hit, (m_currentWaypoint - transform.position).magnitude))
+            {
+                newPosition.y = hit.point.y + 0.5f;
+            }
+
+            transform.position = newPosition;
         }
         
         private void OnDrawGizmos()
