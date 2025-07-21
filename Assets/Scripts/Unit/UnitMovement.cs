@@ -1,19 +1,21 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 
 namespace DungeonRun.Unit
 {
+    [RequireComponent(typeof(NavMeshAgent))]
     public class UnitMovement : MonoBehaviour
     {
-        [SerializeField] private Vector3 m_moveTarget = Vector3.zero;
+        private NavMeshAgent m_navMeshAgent = null;
         
         public void SetMoveTarget(Vector3 targetPosition)
         {
-            m_moveTarget = targetPosition;
+            m_navMeshAgent.SetDestination(targetPosition);
         }
 
-        private void Update()
+        private void Awake()
         {
-            transform.position = Vector3.MoveTowards(transform.position, m_moveTarget, Time.deltaTime * 5.0f);
+            m_navMeshAgent = GetComponent<NavMeshAgent>();
         }
     }
 }
